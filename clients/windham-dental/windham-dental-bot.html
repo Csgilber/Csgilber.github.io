@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windham Dental Group — Front Desk Assistant</title>
+<style>
+  :root {
+    --wdg-navy: #1c3d5a;
+    --wdg-teal: #2a8c8c;
+    --wdg-teal-dark: #1f6d6d;
+    --wdg-bg: #f5f8f9;
+    --wdg-bubble-bot: #ffffff;
+    --wdg-bubble-user: #2a8c8c;
+    --wdg-text: #1a2b38;
+    --wdg-muted: #6b7c89;
+    --wdg-border: #d9e4e8;
+    --wdg-shadow: 0 6px 24px rgba(28,61,90,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--wdg-bg);
+    color: var(--wdg-text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .wdg-header {
+    background: var(--wdg-navy);
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .wdg-logo {
+    width: 38px; height: 38px;
+    background: var(--wdg-teal);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .wdg-header-text h1 { font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .wdg-header-text p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .wdg-status { margin-left: auto; font-size: 11px; display: flex; align-items: center; gap: 5px; opacity: 0.85; }
+  .wdg-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+  .wdg-chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .wdg-msg { max-width: 82%; padding: 11px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+  .wdg-msg.bot {
+    background: var(--wdg-bubble-bot);
+    border: 1px solid var(--wdg-border);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .wdg-msg.user {
+    background: var(--wdg-bubble-user);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .wdg-msg a { color: var(--wdg-teal); font-weight: 600; }
+  .wdg-msg.user a { color: #fff; text-decoration: underline; }
+  .wdg-quick { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 10px; }
+  .wdg-quick button {
+    background: #fff;
+    border: 1px solid var(--wdg-teal);
+    color: var(--wdg-teal-dark);
+    border-radius: 16px;
+    padding: 7px 13px;
+    font-size: 12.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .wdg-quick button:hover { background: #e8f4f4; }
+  .wdg-typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 14px; }
+  .wdg-typing span { width: 7px; height: 7px; background: var(--wdg-muted); border-radius: 50%; animation: blink 1.2s infinite; }
+  .wdg-typing span:nth-child(2){ animation-delay: 0.2s; }
+  .wdg-typing span:nth-child(3){ animation-delay: 0.4s; }
+  @keyframes blink { 0%,60%,100%{opacity:0.3} 30%{opacity:1} }
+  .wdg-input {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--wdg-border);
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .wdg-input input {
+    flex: 1;
+    border: 1px solid var(--wdg-border);
+    border-radius: 22px;
+    padding: 11px 16px;
+    font-size: 14px;
+    outline: none;
+  }
+  .wdg-input input:focus { border-color: var(--wdg-teal); }
+  .wdg-input button {
+    background: var(--wdg-teal);
+    color: #fff;
+    border: none;
+    border-radius: 22px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wdg-input button:disabled { opacity: 0.5; cursor: default; }
+  .wdg-disclaimer { font-size: 10.5px; color: var(--wdg-muted); text-align: center; padding: 6px 12px 10px; background: #fff; }
+</style>
+</head>
+<body>
+  <div class="wdg-header">
+    <div class="wdg-logo">W</div>
+    <div class="wdg-header-text">
+      <h1>Windham Dental Group</h1>
+      <p>Front Desk Assistant</p>
+    </div>
+    <div class="wdg-status"><span class="wdg-dot"></span> Online</div>
+  </div>
+
+  <div class="wdg-chat" id="chat"></div>
+
+  <div class="wdg-quick" id="quick">
+    <button onclick="quick('What are your hours?')">Hours</button>
+    <button onclick="quick('What services do you offer?')">Services</button>
+    <button onclick="quick('I want to request an appointment')">Book a visit</button>
+    <button onclick="quick('I am a new patient, what do I need?')">New patients</button>
+    <button onclick="quick('I have a dental emergency')">Emergency</button>
+  </div>
+
+  <div class="wdg-input">
+    <input id="msg" type="text" placeholder="Type your question..." autocomplete="off"
+           onkeydown="if(event.key==='Enter')send()">
+    <button id="sendBtn" onclick="send()">Send</button>
+  </div>
+  <div class="wdg-disclaimer">
+    Informational assistant only — not a substitute for professional advice. For emergencies call 911.
+  </div>
+
+<script>
+/* ============================================================
+   CONFIG — Cole sets these per client
+   ============================================================ */
+const GEMINI_API_KEY = "GEMINI_API_KEY"; // separate GCloud project per client
+const GEMINI_MODEL   = "gemini-2.5-flash";
+const LEAD_EMAIL     = "https://formspree.io/f/mqevkrbz"; // where fallback lead form mails to (Formspree etc.)
+
+/* ============================================================
+   LAYER 1 — UNIVERSAL GUARDRAILS (same across every client)
+   ============================================================ */
+const LAYER_1_GUARDRAILS = `
+You are an informational front-desk assistant embedded on a business website.
+HARD RULES — never break these:
+- You are NOT a medical professional. Never diagnose, never recommend treatment, never interpret symptoms clinically. Redirect anything clinical to "please call the office and our team can help."
+- Never collect, store, or ask for sensitive health information, insurance ID numbers, SSNs, or full dates of birth. You may take a name, phone, email, and a short reason for the visit ONLY to pass an appointment request to staff.
+- Never invent facts. If something is not in your knowledge base below, say you are not sure and direct them to call the office.
+- Never quote exact prices or guarantee insurance coverage. Say the office can confirm costs and coverage directly.
+- Keep replies short, warm, and plain. 2-4 sentences. Use the office phone number and the relevant page link when helpful.
+- For any emergency or severe pain/injury: tell them to call the office immediately, and for life-threatening issues call 911.
+`;
+
+/* ============================================================
+   LAYER 2 — DENTAL VERTICAL INSTRUCTIONS (shared across dental clients)
+   ============================================================ */
+const LAYER_2_VERTICAL = `
+You serve a dental practice. Your jobs, in priority order:
+1. Answer common questions (hours, location, services, new-patient process, insurance/payment generally).
+2. Capture appointment requests — collect name, phone, best time to reach them, and reason for visit, then tell them the front desk will confirm. Always also offer the online Appointment Request page as a backup.
+3. Encourage new patients to complete forms in advance.
+Tone: friendly small-town practice, reassuring to anxious patients. Never pushy.
+HIPAA boundary: you are strictly informational. Do not gather clinical/patient health detail beyond a one-line reason for the visit.
+`;
+
+/* ============================================================
+   LAYER 3 — CLIENT KNOWLEDGE BASE (unique per client; scraped from their site)
+   ============================================================ */
+const LAYER_3_CLIENT = `
+PRACTICE: Windham Dental Group — a local, trusted family & cosmetic dental practice in Windham, NH.
+PHONE: (603) 893-3891
+APPOINTMENT REQUEST PAGE: https://www.windhamdentalgroupnh.com/appointment
+NEW PATIENT PAGE: https://www.windhamdentalgroupnh.com/new-patients
+SERVICES PAGE: https://www.windhamdentalgroupnh.com/dental-services
+CONTACT PAGE: https://www.windhamdentalgroupnh.com/contact
+
+HOURS:
+- Monday: Closed
+- Tuesday: 7:00 AM – 6:00 PM
+- Wednesday: 7:00 AM – 4:00 PM
+- Thursday: Closed
+- Friday: 7:00 AM – 12:00 PM
+- Saturday: 2nd Saturday of each month only, 8:30 AM – 1:30 PM (cleanings + emergencies)
+- Sunday: Closed
+
+SERVICES OFFERED:
+General/family dentistry, teeth cleanings & exams, fillings, teeth whitening, dental implants,
+crowns & bridgework, porcelain veneers, bonding, removable dentures, sealants (children),
+oral cancer screenings, periodontal (gum) disease therapy, orthodontic treatment,
+TMJ/TMD treatment, tooth extractions, and emergency dental treatment.
+
+NEW PATIENTS:
+First visit collects medical history and background. Patients can save time by printing and
+completing forms in advance. Forms available on the New Patients page: Welcome Form, Medical
+History Form, Phone Policy Form, Office Policy Form, Office Procedure Consent Form, HIPAA Form.
+
+EMERGENCIES:
+For life-threatening or severe injury, call 911 or go to the nearest ER. The practice treats
+chipped, moved, or knocked-out teeth — patients should call the office for assistance.
+
+PAYMENT/INSURANCE: The office can confirm accepted insurance and costs directly — do not quote specifics.
+`;
+
+const SYSTEM_PROMPT = LAYER_1_GUARDRAILS + "\n" + LAYER_2_VERTICAL + "\n" + LAYER_3_CLIENT;
+
+/* ============================================================
+   CHAT LOGIC
+   ============================================================ */
+const chat = document.getElementById('chat');
+const input = document.getElementById('msg');
+const sendBtn = document.getElementById('sendBtn');
+let history = [];
+
+function addMsg(text, who) {
+  const div = document.createElement('div');
+  div.className = 'wdg-msg ' + who;
+  div.innerHTML = linkify(text);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+function linkify(t) {
+  return t.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>')
+          .replace(/\((\d{3})\)\s?(\d{3})-(\d{4})/g, '<a href="tel:+1$1$2$3">($1) $2-$3</a>');
+}
+function showTyping() {
+  const t = document.createElement('div');
+  t.className = 'wdg-typing'; t.id = 'typing';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  chat.appendChild(t); chat.scrollTop = chat.scrollHeight;
+}
+function hideTyping() { const t = document.getElementById('typing'); if (t) t.remove(); }
+
+function quick(text) { input.value = text; send(); }
+
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+  addMsg(text, 'user');
+  history.push({ role: 'user', parts: [{ text }] });
+  input.value = '';
+  sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const reply = await callGemini();
+    hideTyping();
+    addMsg(reply, 'bot');
+    history.push({ role: 'model', parts: [{ text: reply }] });
+  } catch (e) {
+    hideTyping();
+    fallback(text);
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+async function callGemini() {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': GEMINI_API_KEY
+    },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: history,
+      generationConfig: { temperature: 0.4, maxOutputTokens: 300 }
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  const data = await res.json();
+  const out = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!out) throw new Error('Empty response');
+  return out.trim();
+}
+
+/* ============================================================
+   GRACEFUL FALLBACK — runs if API is down/over quota.
+   Lead capture must ALWAYS work even with no AI.
+   ============================================================ */
+function fallback(lastText) {
+  addMsg(
+    "I'm having trouble connecting right now, but I can still help. " +
+    "For anything urgent please call us at (603) 893-3891. " +
+    "Or leave your name and number below and the front desk will reach out.",
+    'bot'
+  );
+  showLeadForm();
+}
+
+function showLeadForm() {
+  if (document.getElementById('leadForm')) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'wdg-msg bot';
+  wrap.id = 'leadForm';
+  wrap.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <input id="lf-name" placeholder="Your name" style="padding:8px;border:1px solid #d9e4e8;border-radius:8px;font-size:13px;">
+      <input id="lf-phone" placeholder="Phone number" style="padding:8px;border:1px solid #d9e4e8;border-radius:8px;font-size:13px;">
+      <input id="lf-reason" placeholder="Reason for visit (optional)" style="padding:8px;border:1px solid #d9e4e8;border-radius:8px;font-size:13px;">
+      <button onclick="submitLead()" style="background:#2a8c8c;color:#fff;border:none;border-radius:8px;padding:9px;font-weight:600;cursor:pointer;">Request a callback</button>
+    </div>`;
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function submitLead() {
+  const name = document.getElementById('lf-name').value.trim();
+  const phone = document.getElementById('lf-phone').value.trim();
+  const reason = document.getElementById('lf-reason').value.trim();
+  if (!name || !phone) { alert('Please add your name and phone.'); return; }
+  // In production: POST to Formspree/Google Form/email endpoint. Demo just confirms.
+  const form = document.getElementById('leadForm');
+  if (form) form.remove();
+  fetch('https://formspree.io/f/mqevkrbz', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  body: JSON.stringify({ name, phone, reason, source: 'Windham Dental chatbot' })
+});
+  addMsg(`Thank you, ${name}! We have received your request and the front desk will call ${phone} soon. For anything urgent, call (603) 893-3891.`, 'bot');
+}
+
+// Greeting
+addMsg("Hi! 👋 I'm the front desk assistant for Windham Dental Group. I can help with hours, services, new-patient info, or starting an appointment request. What can I help you with?", 'bot');
+</script>
+</body>
+</html>
