@@ -274,12 +274,11 @@ async function send() {
 }
 
 async function callGemini() {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const url = `https://windham-bot.csgilber.workers.dev`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-goog-api-key': GEMINI_API_KEY
     },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
